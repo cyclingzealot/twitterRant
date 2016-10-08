@@ -49,36 +49,36 @@ words.each_with_index { |word, i|
     nextLength = "#{tweet} #{word} #{tweetNum}/nn #{suffix}".length
 
     if  /\n\s*\n/.match(word)
+        print __LINE__.to_s + ' ' if debug
         ## We have one or more new lines
         startNextTweet  = FALSE
         sentenceContinue = FALSE
         pushCurrentTweet = TRUE
-        print __LINE__.to_s + ' ' if debug
     elsif nextLength >= charLimit
+        print __LINE__.to_s + ' ' if debug
         ## We are beyond the space alloted for the size of the tweet
         startNextTweet = TRUE
         sentenceContinue = TRUE
         pushCurrentTweet = TRUE
-        print __LINE__.to_s + ' ' if debug
     elsif tweet.length >= charLimit*finishSentenceAt and ['!', '?', '.', ','].member?(tweet[-1, 1])
+        print __LINE__.to_s + ' ' if debug
         ## We have reached the end of the sentence within the
         startNextTweet = TRUE
         sentenceContinue = FALSE
         pushCurrentTweet = TRUE
-        print __LINE__.to_s + ' ' if debug
     elsif i == words.size - 1
+        print __LINE__.to_s + ' ' if debug
         ## We are at the last word of the entire text
         tweets.push("#{tweet} #{word} #{tweetNum}/#{tweets.size+1} #{suffix}")
         startNextTweet = FALSE
         pushCurrentTweet = FALSE
-        print __LINE__.to_s + ' ' if debug
     else
+        print __LINE__.to_s + ' ' if debug
         ## We still got space, keep building the tweet,
         tweet += word + ' '
         startNextTweet = FALSE
         sentenceContinue = FALSE
         pushCurrentTweet = FALSE
-        print __LINE__.to_s + ' ' if debug
     end
 
     sentenceCutDots = ''
