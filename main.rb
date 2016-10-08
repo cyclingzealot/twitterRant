@@ -2,12 +2,13 @@
 
 require 'set'
 require 'pathname'
+require 'byebug'
 
 charLimit = 140
 finishSentenceAt = 4/5
 
 if ARGV[2].nil?
-    puts "Give me prefix, path to text suffix"
+    puts "Give me prefix, path to text, suffix, [debug]"
     exit 1
 end
 
@@ -23,12 +24,15 @@ puts
 #print "What is your suffix? "
 suffix = ARGV[2]
 
+debug = FALSE
+debug = TRUE if ! ARGV[3].nil?
+
 puts
 
 charsLeft = charLimit - (prefix+' '+' '+suffix).length - ' 1/10 '.length
 
 puts "You have #{charsLeft} chars left"
-puts '=' *charsLeft
+puts '=' *charLimit
 
 text = File.read(File.expand_path(ARGV[1]))
 
@@ -49,27 +53,32 @@ words.each_with_index { |word, i|
         startNextTweet  = FALSE
         sentenceContinue = FALSE
         pushCurrentTweet = TRUE
-    elsif nextLength >= charsLeft
+        print __LINE__.to_s + ' ' if debug
+    elsif nextLength >= charLimit
         ## We are beyond the space alloted for the size of the tweet
         startNextTweet = TRUE
         sentenceContinue = TRUE
         pushCurrentTweet = TRUE
+        print __LINE__.to_s + ' ' if debug
     elsif tweet.length >= charLimit*finishSentenceAt and ['!', '?', '.', ','].member?(tweet[-1, 1])
         ## We have reached the end of the sentence within the
         startNextTweet = TRUE
         sentenceContinue = FALSE
         pushCurrentTweet = TRUE
+        print __LINE__.to_s + ' ' if debug
     elsif i == words.size - 1
         ## We are at the last word of the entire text
         tweets.push("#{tweet} #{word} #{tweetNum}/#{tweets.size+1} #{suffix}")
         startNextTweet = FALSE
         pushCurrentTweet = FALSE
+        print __LINE__.to_s + ' ' if debug
     else
         ## We still got space, keep building the tweet,
         tweet += word + ' '
         startNextTweet = FALSE
         sentenceContinue = FALSE
         pushCurrentTweet = FALSE
+        print __LINE__.to_s + ' ' if debug
     end
 
     sentenceCutDots = ''
@@ -88,6 +97,7 @@ words.each_with_index { |word, i|
 
 }
 
+puts ; puts;
 tweets.each  {|t|
     puts t
     puts
