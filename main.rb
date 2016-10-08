@@ -1,17 +1,27 @@
 #!/bin/ruby
 
 require 'set'
+require 'pathname'
 
 charLimit = 140
 finishSentenceAt = 4/5
 
-print "What is your prefix? "
-prefix = $stdin.gets.chomp.strip
+if ARGV[2].nil?
+    puts "Give me prefix, path to text suffix"
+    exit 1
+end
+
+if ! File.exist?(File.expand_path(ARGV[1]))
+    puts "#{ARGV[1]} does not seem to be a path"
+end
+
+#print "What is your prefix? "
+prefix = ARGV[0]
 
 puts
 
-print "What is your suffix? "
-suffix = $stdin.gets.chomp.strip
+#print "What is your suffix? "
+suffix = ARGV[2]
 
 puts
 
@@ -20,9 +30,7 @@ charsLeft = charLimit - (prefix+' '+' '+suffix).length - ' 1/10 '.length
 puts "You have #{charsLeft} chars left"
 puts '=' *charsLeft
 
-
-print "What is your text? "
-text = $stdin.gets.chomp.strip
+text = File.read(File.expand_path(ARGV[1]))
 
 
 tweet = prefix + ' '
@@ -35,11 +43,11 @@ words.each_with_index { |word, i|
 
     nextLength = "#{tweet} #{word} #{tweetNum}/nn #{suffix}".length
 
-    if nextLength >= charsLeft
+    if nextLength >= charLimit
         ## We are beyond the space alloted for the size of the tweet
         startNextTweet = TRUE
         sentenceContinue = TRUE
-    elsif tweet.length >= charsLeft*finishSentenceAt and ['!', '?', '.'].member?(tweet[-1, 1])
+    elsif tweet.length >= charLimit*finishSentenceAt and ['!', '?', '.', ','].member?(tweet[-1, 1])
         ## We have reached the end of the sentence within the
         startNextTweet = TRUE
         sentenceContinue = FALSE
