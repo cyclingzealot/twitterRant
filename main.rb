@@ -14,6 +14,7 @@ end
 
 if ! File.exist?(File.expand_path(ARGV[1]))
     puts "#{ARGV[1]} does not seem to be a path"
+    exit 1
 end
 
 #print "What is your prefix? "
@@ -34,66 +35,63 @@ charsLeft = charLimit - (prefix+' '+' '+suffix).length - ' 1/10 '.length
 puts "You have #{charsLeft} chars left"
 puts '=' *charLimit
 
-text = File.read(File.expand_path(ARGV[1]))
+text = File.read(File.expand_path(ARGV[1])).strip.gsub(/(\n+)/, "\n").gsub(/(\n)/, ' (newline) ')
 
 
 tweet = prefix + ' '
 tweetNum = 1
-startNextTweet = FALSE
-sentenceContinue = FALSE
-pushCurrentTweet = FALSE
 words = text.split(' ')
 tweets = []
+endOfRant = FALSE
 words.each_with_index { |word, i|
+    endofCurrentTweet = FALSE
+    sentenceContinue = FALSE
+    endOfRant = TRUE if i == words.size - 1
 
     nextLength = "#{tweet} #{word} #{tweetNum}/nn #{suffix}".length
 
-    if  /\n\s*\n/.match(word)
+    print word + ' ' if debug
+
+    if word == '(newline)'
+        ## We met a new line token
         print __LINE__.to_s + ' ' if debug
-        ## We have one or more new lines
-        startNextTweet  = FALSE
-        sentenceContinue = FALSE
-        pushCurrentTweet = TRUE
+        endOfCurrentTweet = TRUE
     elsif nextLength >= charLimit
-        print __LINE__.to_s + ' ' if debug
         ## We are beyond the space alloted for the size of the tweet
-        startNextTweet = TRUE
+        print __LINE__.to_s + ' ' if debug
+        endOfCurrentTweet = TRUE
         sentenceContinue = TRUE
-        pushCurrentTweet = TRUE
     elsif tweet.length >= charLimit*finishSentenceAt and ['!', '?', '.', ','].member?(tweet[-1, 1])
-        print __LINE__.to_s + ' ' if debug
         ## We have reached the end of the sentence within the
-        startNextTweet = TRUE
-        sentenceContinue = FALSE
-        pushCurrentTweet = TRUE
-    elsif i == words.size - 1
         print __LINE__.to_s + ' ' if debug
-        ## We are at the last word of the entire text
-        tweets.push("#{tweet} #{word} #{tweetNum}/#{tweets.size+1} #{suffix}")
-        startNextTweet = FALSE
-        pushCurrentTweet = FALSE
+        endOfCurrentTweet = TRUE
     else
-        print __LINE__.to_s + ' ' if debug
         ## We still got space, keep building the tweet,
+        print __LINE__.to_s + ' ' if debug
         tweet += word + ' '
-        startNextTweet = FALSE
-        sentenceContinue = FALSE
-        pushCurrentTweet = FALSE
     end
 
     sentenceCutDots = ''
     sentenceCutDots = '..' if sentenceContinue
 
     # Generate and save the current tweet
-    if pushCurrentTweet
-        tweets.push("#{tweet} #{tweetNum}/n #{suffix}")
-        tweetNum += 1
+    if endOfRant
+        if endOfCurrentTweet
+            tweets.push("#{tweet} #{tweetNum}/n #{suffix}")
+            tweetNum += 1
+            tweet = "#{prefix} #{sentenceContinue}#{word}"
+            tweets.push("#{tweet} #{tweetNum}/#{tweetNum} #{suffix}")
+        else
+            tweets.push("#{tweet} #{tweetNum}/#{tweetNum} #{suffix}")
+        end
+    else
+        if endOfCurrentTweet
+            tweets.push("#{tweet} #{tweetNum}/n #{suffix}")
+            tweetNum += 1
+            tweet = "#{prefix} #{sentenceCutDots}#{word} "
+        end
     end
 
-    # Start the next tweet with the current word
-    if startNextTweet
-        tweet = "#{prefix} #{sentenceCutDots}#{word} "
-    end
 
 }
 
