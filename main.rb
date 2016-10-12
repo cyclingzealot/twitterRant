@@ -35,7 +35,13 @@ charsLeft = charLimit - (prefix+' '+' '+suffix).length - ' 1/10 '.length
 puts "You have #{charsLeft} chars left"
 puts '=' *charLimit
 
-text = File.read(File.expand_path(ARGV[1])).strip.gsub(/(\n+)/, "\n").gsub(/(\n)/, ' (newline) ')
+text = File.read(File.expand_path(ARGV[1])).strip
+
+text = text.gsub(/([\r\n]+)/, "\r\n")
+
+text = text.gsub(/(\r\n)/, ' (newline) ')
+
+debugger if debug
 
 
 tweet = prefix + ' '
@@ -76,10 +82,11 @@ words.each_with_index { |word, i|
 
     # Generate and save the current tweet
     if endOfRant
+        debugger if debug
         if endOfCurrentTweet
             tweets.push("#{tweet} #{tweetNum}/n #{suffix}")
             tweetNum += 1
-            tweet = "#{prefix} #{sentenceContinue}#{word}"
+            tweet = "#{prefix} #{sentenceCutDots}#{word}"
             tweets.push("#{tweet} #{tweetNum}/#{tweetNum} #{suffix}")
         else
             tweets.push("#{tweet} #{tweetNum}/#{tweetNum} #{suffix}")
@@ -88,7 +95,9 @@ words.each_with_index { |word, i|
         if endOfCurrentTweet
             tweets.push("#{tweet} #{tweetNum}/n #{suffix}")
             tweetNum += 1
-            tweet = "#{prefix} #{sentenceCutDots}#{word} "
+            wordForNewTweet = word + ' '
+            wordForNewTweet = '' if word == '(newline)'
+            tweet = "#{prefix} #{sentenceCutDots}#{wordForNewTweet}"
         end
     end
 
