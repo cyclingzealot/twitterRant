@@ -12,10 +12,6 @@ if ARGV[2].nil?
     exit 1
 end
 
-if ! File.exist?(File.expand_path(ARGV[1]))
-    puts "#{ARGV[1]} does not seem to be a path"
-    exit 1
-end
 
 #print "What is your prefix? "
 prefix = ARGV[0]
@@ -35,7 +31,11 @@ charsLeft = charLimit - (prefix+' '+' '+suffix).length - ' 1/10 '.length
 puts "You have #{charsLeft} chars left"
 puts '=' *charLimit
 
-text = File.read(File.expand_path(ARGV[1])).strip
+if File.exist?(File.expand_path(ARGV[1]))
+    text = File.read(File.expand_path(ARGV[1])).strip
+else
+    text = ARGV[1]
+end
 
 text = text.gsub(/([\r\n]+)/, "\r\n")
 
