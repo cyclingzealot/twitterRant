@@ -106,7 +106,7 @@ words.each_with_index { |word, i|
 
 puts ; puts;
 tweets.each  {|t|
-    puts t
+    puts t.strip
     puts
 }
 
