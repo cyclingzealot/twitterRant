@@ -33,6 +33,8 @@ puts '=' *charLimit
 
 if File.exist?(File.expand_path(ARGV[1]))
     text = File.read(File.expand_path(ARGV[1])).strip
+elsif ARV[1] == '-'
+    ### Read input and save it
 else
     text = ARGV[1]
 end
