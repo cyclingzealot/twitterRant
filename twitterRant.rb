@@ -3,6 +3,9 @@
 require 'set'
 require 'pathname'
 require 'byebug'
+require 'readline'
+require 'date'
+
 
 charLimit = 140
 finishSentenceAt = 4/5
@@ -33,8 +36,12 @@ puts '=' *charLimit
 
 if File.exist?(File.expand_path(ARGV[1]))
     text = File.read(File.expand_path(ARGV[1])).strip
-elsif ARV[1] == '-'
-    ### Read input and save it
+elsif ARGV[1] == '-'
+    savePath = "/tmp/twitterRant.#{DateTime.now.strftime('%Y%m%d-%H%M%S')}.txt"
+    puts "Rant to be saved at #{savePath}"
+    prompt = "Input rant: "
+    text = Readline.readline(prompt, true).squeeze(" ").strip
+    File.open((savePath), 'w') {|f| f.write(text) }
 else
     text = ARGV[1]
 end
